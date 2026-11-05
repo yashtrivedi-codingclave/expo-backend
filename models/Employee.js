@@ -52,10 +52,11 @@ const employeeSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: {
-      values: ['active', 'inactive'],
+      values: ['active', 'inactive', 'Active', 'Inactive'],
       message: '{VALUE} is not a valid status',
     },
     default: 'active',
+    set: (v) => (v ? v.toLowerCase() : 'active'),
   },
   address: {
     type: String,

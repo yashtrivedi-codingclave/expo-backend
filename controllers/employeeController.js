@@ -98,7 +98,7 @@ const createEmployee = async (req, res) => {
       position,
       salary,
       joinDate,
-      status,
+      status: status ? status.toLowerCase() : 'active',
       address,
     });
 
@@ -128,6 +128,10 @@ const createEmployee = async (req, res) => {
 const updateEmployee = async (req, res) => {
   try {
     const updates = { ...req.body, updatedAt: Date.now() };
+
+    if (updates.status) {
+      updates.status = updates.status.toLowerCase();
+    }
 
     // Prevent overwriting the auto-generated employeeId
     delete updates.employeeId;
