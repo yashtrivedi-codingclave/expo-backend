@@ -222,6 +222,11 @@ const getStats = async (req, res) => {
       activeEmployees,
       inactiveEmployees,
       departments,
+      // Frontend compatibility aliases:
+      total: totalEmployees,
+      active: activeEmployees,
+      inactive: inactiveEmployees,
+      departmentList: departmentAggregation.map((d) => ({ _id: d._id, count: d.count })),
     });
   } catch (error) {
     console.error('getStats error:', error);
