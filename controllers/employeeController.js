@@ -18,7 +18,7 @@ const getAllEmployees = async (req, res) => {
 
     // Status filter
     if (status) {
-      filter.status = status;
+      filter.status = status.toLowerCase();
     }
 
     // Search across multiple fields
@@ -34,7 +34,9 @@ const getAllEmployees = async (req, res) => {
       ];
     }
 
-    const employees = await Employee.find(filter).sort({ createdAt: -1 });
+    const employees = await Employee.find(filter)
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.status(200).json({
       count: employees.length,
@@ -197,20 +199,22 @@ const deleteEmployee = async (req, res) => {
  */
 const getStats = async (req, res) => {
   try {
-    const totalEmployees = await Employee.countDocuments();
-    const activeEmployees = await Employee.countDocuments({ status: 'active' });
-    const inactiveEmployees = await Employee.countDocuments({ status: 'inactive' });
-
-    // Count per department
-    const departmentAggregation = await Employee.aggregate([
-      {
-        $group: {
-          _id: '$department',
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { count: -1 } },
-    ]);
+    // Run all count and aggregate queries in parallel with Promise.all
+    const [totalEmployees, activeEmployees, inactiveEmployees, departmentAggregation] =
+      await Promise.all([
+        Employee.countDocuments(),
+        Employee.countDocuments({ status: 'active' }),
+        Employee.countDocuments({ status: 'inactive' }),
+        Employee.aggregate([
+          {
+            $group: {
+              _id: '$department',
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { count: -1 } },
+        ]),
+      ]);
 
     const departments = departmentAggregation.reduce((acc, item) => {
       acc[item._id] = item.count;

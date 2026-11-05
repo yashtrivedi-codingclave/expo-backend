@@ -81,4 +81,10 @@ employeeSchema.pre('save', async function (next) {
   next();
 });
 
+// Indexes for ultra-fast queries and search
+employeeSchema.index({ email: 1 });
+employeeSchema.index({ status: 1 });
+employeeSchema.index({ department: 1 });
+employeeSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Employee', employeeSchema);
